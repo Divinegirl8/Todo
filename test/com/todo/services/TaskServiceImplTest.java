@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -38,7 +40,7 @@ class TaskServiceImplTest {
         dueDate.setDate(date);
         dueDate.setTime(time);
 
-        taskService.setTask("1", "1", "Reading", dueDate, false);
+        taskService.setTask("1", "1", LocalDateTime.now(),"Reading", dueDate, false);
         assertEquals(1,taskRepository.count());
     }
 

@@ -18,4 +18,9 @@ public interface TodoServices {
     void deleteTask(DeleteTaskRequest deleteTaskRequest);
     Task findTaskBy(String userId,String taskId);
     List<Task> findAllTask(String userId);
+
+    Task editTaskDueDate(EditTaskDateRequest editTaskDateRequest);
+    Task editTaskMessage(EditTaskMessageRequest editTaskMessageRequest);
+    void deleteAllTask(String userId);
+    void deleteAccount(DeleteAccountRequest deleteAccountRequest);
 }
