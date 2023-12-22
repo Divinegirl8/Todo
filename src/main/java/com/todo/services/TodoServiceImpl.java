@@ -1,27 +1,30 @@
 package com.todo.services;
 
+import com.todo.data.models.Task;
 import com.todo.data.models.User;
 import com.todo.data.repositories.TaskRepository;
 import com.todo.data.repositories.UserRepository;
-import com.todo.dtos.request.LoginRequest;
-import com.todo.dtos.request.LogoutRequest;
-import com.todo.dtos.request.RegisterRequest;
-import com.todo.exceptions.InvalidDetailsException;
-import com.todo.exceptions.NoUserExist;
-import com.todo.exceptions.NotLoginException;
-import com.todo.exceptions.UserExistException;
+import com.todo.dtos.request.*;
+import com.todo.exceptions.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.todo.utils.Mapper.*;
 
 @Service
 public class TodoServiceImpl implements TodoServices{
     @Autowired
-    TaskService taskService;
+   private TaskService taskService;
     @Autowired
-    TaskRepository taskRepository;
+    private TaskRepository taskRepository;
     @Autowired
-    UserRepository userRepository;
+   private UserRepository userRepository;
+
+
     @Override
     public User register(RegisterRequest registerRequest) {
         if (userExist(registerRequest.getUsername())){ throw new UserExistException(registerRequest.getUsername() + " already exists");
@@ -36,7 +39,9 @@ public class TodoServiceImpl implements TodoServices{
         User user = userRepository.findUserByUserName(loginRequest.getUsername());
 
         if (!userExist(loginRequest.getUsername())) throw new InvalidDetailsException();
-        if (!user.getPassword().equals(loginRequest.getPassword())) throw new InvalidDetailsException();
+        if (user.getPassword() == null || !user.getPassword().equals(loginRequest.getPassword())) {
+            throw new InvalidDetailsException();
+        }
 
         user.setLogin(true);
         userRepository.save(user);
@@ -46,7 +51,7 @@ public class TodoServiceImpl implements TodoServices{
 
 
     @Override
-    public User findTaskBelongingTo(String username) {
+    public User findAccountBelongingTo(String username) {
         return userRepository.findUserByUserName(username);
     }
 
@@ -66,6 +71,91 @@ public class TodoServiceImpl implements TodoServices{
      user.setLogin(false);
      userRepository.save(user);
     }
+
+    @Override
+    public Task addTask(TaskRequest taskRequest) {
+        User user =  userRepository.findUserByUserId(taskRequest.getUserId());
+
+        if (user == null) throw new NoUserExist(taskRequest.getUserId() + " not found");
+        if (!user.isLogin()) throw new NotLoginException("you must login before performing this action");
+
+        int taskId = user.getTaskId()+1;
+        user.setTaskId(taskId);
+        userRepository.save(user);
+      Task task =  taskService.setTask("TID" +(user.getTaskId()),taskRequest.getUserId(),taskRequest.getMessage(),taskRequest.getDueDate(),false);
+
+      taskRepository.save(task);
+      return task;
+
+    }
+
+    @Override
+    public void completeTask(CompleteTaskRequest completeTaskRequest) {
+      User user = userRepository.findUserByUserId(completeTaskRequest.getUserId());
+      if (user == null) throw new NoUserExist(completeTaskRequest.getUserId() + " does not exist");
+      if (!user.isLogin()) throw new NotLoginException("you must login before performing this action");
+
+      Task task = findTaskById(completeTaskRequest.getTaskId());
+
+      task.setUserId(user.getUserId());
+      task.setStatus(true);
+      taskRepository.save(task);
+
+    }
+
+    @Override
+    public Task findTaskById(String taskId) {
+        Task task = taskRepository.findByTaskId(taskId);
+        if (task == null) throw new TaskIdNotFoundException(taskId + " not found");
+        return task;
+    }
+
+    @Override
+    public void deleteTask(DeleteTaskRequest deleteTaskRequest) {
+      User user = userRepository.findUserByUserId(deleteTaskRequest.getUserId());
+        if (user == null) throw new NoUserExist(deleteTaskRequest.getUserId() + " does not exist");
+        if (!user.isLogin()) throw new NotLoginException("you must login before performing this action");
+        if (!user.getPassword().equals(deleteTaskRequest.getPassword())) throw new InvalidDetailsException();
+
+
+        Task task = taskRepository.findByTaskId(deleteTaskRequest.getTaskId());
+
+        if (task == null) throw new TaskIdNotFoundException(deleteTaskRequest.getTaskId() + " not found");
+        if (!task.getUserId().equals(user.getUserId())) {
+            throw new UnauthorizedTaskAccessException("You are not authorized to delete this task");
+        }
+        taskRepository.delete(task);
+
+    }
+
+    @Override
+    public Task findTaskBy(String userId, String taskId) {
+        User user = userRepository.findUserByUserId(userId);
+
+        if ( user ==  null) throw new NoUserExist(userId + " does not exist");
+        if (!user.isLogin()) throw new NotLoginException("you must login before performing this action");
+
+        Task task = taskRepository.findByTaskId(taskId);
+
+        if (task == null) throw new TaskIdNotFoundException(taskId + " not found");
+        task.setUserId(user.getUserId());
+        taskRepository.save(task);
+
+        return task;
+    }
+
+    @Override
+    public List<Task> findAllTask(String userId) {
+        User user = userRepository.findUserByUserId(userId);
+        List<Task> taskList = new ArrayList<>();
+
+        if ( user ==  null) throw new NoUserExist(userId + " does not exist");
+        for (Task task : taskService.findAll()){
+            if (task.getUserId().equals(user.getUserId())) taskList.add(task);
+        }
+     return taskList;
+    }
+
 
     private boolean userExist(String username){
         User user = userRepository.findUserByUserName(username);

@@ -38,7 +38,7 @@ class TaskServiceImplTest {
         dueDate.setDate(date);
         dueDate.setTime(time);
 
-        System.out.println(taskService.setTask("1", "1", "Reading", dueDate, false));
+        taskService.setTask("1", "1", "Reading", dueDate, false);
         assertEquals(1,taskRepository.count());
     }
 
