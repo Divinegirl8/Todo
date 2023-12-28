@@ -996,7 +996,11 @@ class TodoServiceImplTest {
 
 
         todoServices.completeTask(completeTaskRequest2);
-        Task task = todoServices.findTaskBy("UID1", "TID1");
+
+        FindTaskRequest findTaskRequest = new FindTaskRequest();
+        findTaskRequest.setUserId("UID1");
+        findTaskRequest.setTaskId("TID1");
+        Task task = todoServices.findTaskBy(findTaskRequest);
         assertNotNull(task);
     }
 

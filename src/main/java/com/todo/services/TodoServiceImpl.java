@@ -95,11 +95,7 @@ public class TodoServiceImpl implements TodoServices{
       if (user == null) throw new NoUserExist(completeTaskRequest.getUserId() + " does not exist");
       if (!user.isLogin()) throw new NotLoginException("you must login before performing this action");
 
-      Task task = findTaskById(completeTaskRequest.getTaskId());
-
-      task.setUserId(user.getUserId());
-      task.setStatus(true);
-      taskRepository.save(task);
+      taskService.completeTask(user.getUserId(), completeTaskRequest.getTaskId());
 
     }
 
@@ -129,15 +125,15 @@ public class TodoServiceImpl implements TodoServices{
     }
 
     @Override
-    public Task findTaskBy(String userId, String taskId) {
-        User user = userRepository.findUserByUserId(userId);
+    public Task findTaskBy(FindTaskRequest findTaskRequest) {
+        User user = userRepository.findUserByUserId(findTaskRequest.getUserId());
 
-        if ( user ==  null) throw new NoUserExist(userId + " does not exist");
+        if ( user ==  null) throw new NoUserExist(findTaskRequest.getUserId() + " does not exist");
         if (!user.isLogin()) throw new NotLoginException("you must login before performing this action");
 
-        Task task = taskRepository.findByTaskId(taskId);
+        Task task = taskRepository.findByTaskId(findTaskRequest.getTaskId());
 
-        if (task == null) throw new TaskIdNotFoundException(taskId + " not found");
+        if (task == null) throw new TaskIdNotFoundException(findTaskRequest.getTaskId() + " not found");
         task.setUserId(user.getUserId());
         taskRepository.save(task);
 
@@ -156,6 +152,7 @@ public class TodoServiceImpl implements TodoServices{
      return taskList;
     }
 
+
     @Override
     public Task editTaskDueDate(EditTaskDateRequest editTaskDateRequest) {
         User user = userRepository.findUserByUserId(editTaskDateRequest.getUserId());
@@ -163,12 +160,8 @@ public class TodoServiceImpl implements TodoServices{
         if ( user ==  null) throw new NoUserExist(editTaskDateRequest.getUserId() + " does not exist");
         if (!user.isLogin()) throw new NotLoginException("you must login before performing this action");
 
-        Task task = taskRepository.findByTaskId(editTaskDateRequest.getTaskId());
 
-        if (task == null) throw new TaskIdNotFoundException(editTaskDateRequest.getTaskId() + " not found");
-        task.setDueDate(editTaskDateRequest.getDueDate());
-        taskRepository.save(task);
-        return task;
+        return taskService.editDueDate(editTaskDateRequest.getTaskId(),editTaskDateRequest.getDueDate());
     }
 
     @Override
@@ -178,18 +171,7 @@ public class TodoServiceImpl implements TodoServices{
         if ( user ==  null) throw new NoUserExist(editTaskMessageRequest.getUserId() + " does not exist");
         if (!user.isLogin()) throw new NotLoginException("you must login before performing this action");
 
-        Task task = taskRepository.findByTaskId(editTaskMessageRequest.getTaskId());
-
-        if (task == null) throw new TaskIdNotFoundException(editTaskMessageRequest.getTaskId() + " not found");
-
-        if (editTaskMessageRequest.isAppendToMessage()){
-            String newMessage = task.getMessage() + " " + editTaskMessageRequest.getMessage();
-            task.setMessage(newMessage);
-        } else {
-            task.setMessage(editTaskMessageRequest.getMessage());
-        }
-        taskRepository.save(task);
-        return task;
+       return taskService.editMessage(editTaskMessageRequest.getTaskId(), editTaskMessageRequest.getMessage(), editTaskMessageRequest.isAppendToMessage());
     }
 
     @Override
