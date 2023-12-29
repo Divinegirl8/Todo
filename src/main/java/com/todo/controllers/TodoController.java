@@ -17,10 +17,10 @@ import java.util.List;
 @RestController
 public class TodoController {
     @Autowired
-    TodoServices todoServices;
+   private TodoServices todoServices;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(RegisterRequest registerRequest){
+    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest){
         RegisterResponse registerResponse = new RegisterResponse();
         try {
            User user = todoServices.register(registerRequest);
@@ -33,7 +33,7 @@ public class TodoController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(LoginRequest loginRequest){
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
         LoginResponse loginResponse = new LoginResponse();
         try {
             todoServices.login(loginRequest);
@@ -46,7 +46,7 @@ public class TodoController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(LogoutRequest logoutRequest){
+    public ResponseEntity<?> logout(@RequestBody LogoutRequest logoutRequest){
         LogoutResponse logoutResponse = new LogoutResponse();
 
         try {
@@ -60,7 +60,7 @@ public class TodoController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addTask(TaskRequest taskRequest){
+    public ResponseEntity<?> addTask(@RequestBody TaskRequest taskRequest){
         AddTaskResponse addTaskResponse = new AddTaskResponse();
         try {
             Task task = todoServices.addTask(taskRequest);
@@ -73,7 +73,7 @@ public class TodoController {
     }
 
     @PostMapping("/completeTask")
-    public ResponseEntity<?> completeTask(CompleteTaskRequest completeTaskRequest){
+    public ResponseEntity<?> completeTask(@RequestBody CompleteTaskRequest completeTaskRequest){
         CompleteTaskResponse completeTaskResponse = new CompleteTaskResponse();
 
         try {
@@ -88,7 +88,7 @@ public class TodoController {
     }
 
     @DeleteMapping("/deleteTask")
-    public ResponseEntity<?> deleteTask(DeleteTaskRequest deleteTaskRequest){
+    public ResponseEntity<?> deleteTask(@RequestBody DeleteTaskRequest deleteTaskRequest){
         DeleteTaskResponse deleteTaskResponse = new DeleteTaskResponse();
         try {
             todoServices.deleteTask(deleteTaskRequest);
@@ -100,7 +100,7 @@ public class TodoController {
         }
     }
     @GetMapping("/findTask")
-    public ResponseEntity<?> findTaskBy(FindTaskRequest findTaskRequest){
+    public ResponseEntity<?> findTaskBy(@RequestBody FindTaskRequest findTaskRequest){
      FindTaskResponse findTaskResponse = new FindTaskResponse();
      try {
         Task task = todoServices.findTaskBy(findTaskRequest);
@@ -127,7 +127,7 @@ public class TodoController {
     }
 
     @PatchMapping("/editDate")
-    public ResponseEntity<?> editDueDate(EditTaskDateRequest editTaskDateRequest){
+    public ResponseEntity<?> editDueDate(@RequestBody EditTaskDateRequest editTaskDateRequest){
       EditResponse editResponse = new EditResponse();
 
       try {
@@ -141,7 +141,7 @@ public class TodoController {
     }
 
     @PatchMapping("/editMessage")
-    public ResponseEntity<?> editMessage(EditTaskMessageRequest editTaskMessageRequest){
+    public ResponseEntity<?> editMessage(@RequestBody EditTaskMessageRequest editTaskMessageRequest){
         EditResponse editResponse = new EditResponse();
 
         try {
@@ -169,7 +169,7 @@ public class TodoController {
     }
 
     @DeleteMapping("/deleteAccount")
-    public ResponseEntity<?> deleteAccount(DeleteAccountRequest deleteAccountRequest){
+    public ResponseEntity<?> deleteAccount(@RequestBody DeleteAccountRequest deleteAccountRequest){
         DeleteAccountResponse deleteAccountResponse = new DeleteAccountResponse();
 
         try {
