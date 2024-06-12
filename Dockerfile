@@ -6,3 +6,4 @@ FROM openjdk:17-jdk-slim
 COPY --from=build ./target/*.jar todo.jar
 EXPOSE 8000
 ENTRYPOINT ["java","-jar","todo.jar"]
+
